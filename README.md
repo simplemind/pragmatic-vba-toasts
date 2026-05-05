@@ -1,5 +1,5 @@
 <div>
-  <h1>Pragmatic toast notifications for VBA</h1>
+  <h1>Pragmatic VBA toast notifications</h1>
   <p>I could not find working code so decided to build it. Perhaps it will come handy to others too. Enjoy.</p>
   <p>The code tries to avoid fragile complexities that often break in VBA. The code is designed to work on Windows.</p>
   <p>
