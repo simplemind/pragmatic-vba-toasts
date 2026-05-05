@@ -1,34 +1,54 @@
 Attribute VB_Name = "modToastService"
 Option Explicit
-'Uses modWindowEffects dependency
+'Dependencies: modWindowEffects, modToastDesigns
 
 'OnTime cannot access local variables so we create a global
 Private gToasts As Collection
-Private gToast As frmToast
+Private gToast As frmToastNotification
 
 
 'Main entry point for the
-Public Sub ShowToast(ByVal title As String, ByVal message As String, Optional ByVal duration As Long = 3)
+Public Sub ShowToast(ByVal tTitle As String, ByVal tMessage As String, _
+                      Optional ByVal tType As enmToastType, Optional ByVal tDuration As Long = 3)
   
   EnsureCollection
   
-  Dim frm As frmToast
-  Set frm = New frmToast
+  Dim frm As frmToastNotification
+  Set frm = New frmToastNotification
 
-  frm.SetContent title, message
+  'Populate the form with content
+  frm.SetContent tTitle, tMessage
+  
+  'Style the form
+  frm.ApplyStyle tType
+  
+  'Show the form
   frm.Show vbModeless
 
   DoEvents ' Ensure dimensions are cortypRect
   'Without DoEvents frm.Width and Height may still be 0 or incortypRect
   
-  '#ToDo: Add notification types: information/white, success/green, warning/yellow, error/red, blue, purple
   gToasts.Add frm 'Add to collection
     
   OrganizeAllToasts
     
-  ScheduleClose frm, duration
+  ScheduleClose frm, tDuration
 
 End Sub
+
+
+Private Sub StyleTheToast(ByRef frm As frmToastNotification, tType As enmToastType)
+  
+  'Get the style
+  Dim tStyle As typToastStyle
+  tStyle = GetToastStyle(tType)
+  
+  frm.lblAccentLine.BackColor = tStyle.AccentLineColor
+  frm.lblIcon.Caption = tStyle.IconChar
+  frm.lblIcon.ForeColor = tStyle.IconColor
+
+End Sub
+
 
 Private Sub CloseToast()
 
@@ -111,7 +131,7 @@ Private Sub LayoutToasts()
     currentBottom = screenBottom - MARGIN
     
     Dim i As Long
-    Dim frm As frmToast
+    Dim frm As frmToastNotification
     
     For i = gToasts.Count To 1 Step -1
         
@@ -173,7 +193,7 @@ End Function
 
 
 'Schedules when to close a toast notification
-Private Sub ScheduleClose(frm As frmToast, Optional duration As Long = 3)
+Private Sub ScheduleClose(frm As frmToastNotification, Optional duration As Long = 3)
 
     'Store reference via Tag (simple trick)
     frm.Tag = Timer
@@ -188,7 +208,7 @@ Private Sub Toast_CloseHandler()
     If gToasts Is Nothing Then Exit Sub
     If gToasts.Count = 0 Then Exit Sub
     
-    Dim frm As frmToast
+    Dim frm As frmToastNotification
     
     'Close the oldest (top) if not closed manually
     If IsToastValid(gToasts(1)) Then
@@ -199,7 +219,7 @@ Private Sub Toast_CloseHandler()
 End Sub
 
 
-Private Sub RemoveToast(frm As frmToast)
+Private Sub RemoveToast(frm As frmToastNotification)
 
     Dim i As Long
     
