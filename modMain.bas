@@ -1,7 +1,10 @@
 Attribute VB_Name = "modMain"
 Option Explicit
 'Architecture:
-'
+'frmToastNotification - View layer. Gets its data driven design from GetToastStyle(tType)
+'modToastService - Controller layer. Does all the logic how the application needs to work.
+'modToastDesign - Design layer. Notification Enum and Type settings along with other settings how the form needs to look.
+'modToastWindowEffects - Windows API working out the screen size and positioning of the toasts at the bottom right corner.
 
 
 Private gNotificationCount As Long
@@ -9,80 +12,74 @@ Private gNotificationCount As Long
 Public Sub TestToast()
 Attribute TestToast.VB_ProcData.VB_Invoke_Func = "T\n14"
   
-  Dim title As String, message As String
-  title = ThisWorkbook.Sheets("Sheet1").Cells(1, 2).Value
-  message = ThisWorkbook.Sheets("Sheet1").Cells(2, 2).Value
+  Dim title As String, message As String, duration As Long
+  Dim sh As Worksheet
   
+  Set sh = ThisWorkbook.Sheets("Sheet1")
+    
+  'Assign notification values
+  title = sh.Cells(1, 2).Value
+  message = sh.Cells(2, 2).Value
+  duration = sh.Cells(3, 2).Value
+  
+  'Add a counter and set notification type before calling ShowToast
   gNotificationCount = gNotificationCount + 1
   Dim tType As enmToastType
   tType = gNotificationCount Mod 6 + 1
-  ShowToast title, gNotificationCount & " - " & message, tType, 7
+  
+  ShowToast title, gNotificationCount & " - " & message, tType, duration
 
 End Sub
 
 
-'Temp sub
+Public Sub TestToastInfo()
+
+  Dim title As String, message As String, duration As Long
+  
+  title = "This is a simple title"
+  message = "This is a simple message but it does not have to be simpler. Just something that's not too long perhaps"
+  duration = 5
+  
+  'Use Ctrl+Space shortcut to see available notification types
+  ' Available options ttInfo, ttSuccess, ttWarning, ttError, ttQuestion, ttNeutral
+    ShowToast title, message, ttInfo, 5
+  
+  ' The same can be called as using number 1 instead of ttInfo. Messages are enumarated from 1 to 6
+  'ShowToast title, message, 1, 5
+  
+End Sub
+
+
+Public Sub TestToastWarning()
+
+  Dim title As String, message As String, duration As Long
+  
+  title = "This is a simple title"
+  message = "This is a simple message but it does not have to be simpler. Just something that's not too long perhaps"
+  duration = 5
+  
+  'Use Ctrl+Space shortcut to see available notification types
+  ' Available options ttInfo, ttSuccess, ttWarning, ttError, ttQuestion, ttNeutral
+    ShowToast title, message, ttWarning, 5
+  
+  ' The same can be called as using number 1 instead of ttInfo. Messages are enumarated from 1 to 6
+  'ShowToast title, message, 3, 5
+  
+End Sub
+
+
+'Just a macro to show how a basic notification compares to toast notifications
 Public Sub DisplayBasicNotification()
   
-  Dim title As String, message As String
-  title = ThisWorkbook.Sheets("Sheet1").Cells(1, 2).Value
-  message = ThisWorkbook.Sheets("Sheet1").Cells(2, 2).Value
-
+  Dim title As String, message As String, duration As Long
+  Dim sh As Worksheet
+  
+  Set sh = ThisWorkbook.Sheets("Sheet1")
     
+  'Assign notification values
+  title = sh.Cells(1, 2).Value
+  message = sh.Cells(2, 2).Value
+  
   MsgBox message, vbInformation, title
   
-End Sub
-
-
-Public Sub DisplayIcons()
-
-  Dim frm As frmIcons
-  Set frm = frmIcons
-  
-  Dim arrIcons() As Variant
-  arrIcons = Array("9888", "9989", "9940", "10003", "10004" _
-                    , "10005", "10006", "10060", "10062", "10067" _
-                    , "10069", "10071", "11197", "11198", "11199" _
-                    , "33", "105", "9432", "8505" _
-                    , "128512", "128500", "128501", "128502", "128503" _
-                    , "128504", "128505")
-  
-  Dim i As Long, j As Long
-  Dim lbl As MSForms.Label
-  Dim StartPos As Long
-  StartPos = 12
-  Dim IconSize As Long
-  IconSize = 35
-  Dim ColSize As Long
-  ColSize = 160
-  Dim PosX As Long, PosY As Long
-  
-  
-  frm.BackColor = vbWhite
-  
-  For i = 0 To UBound(arrIcons, 1)
-    '10 per column
-    PosX = 12 + ColSize * Application.WorksheetFunction.Quotient(i, 10)
-    PosY = StartPos + IconSize * (i Mod 10)
-    Set lbl = frm.Controls.Add("Forms.Label.1", "lblIcon_" & i, True)
-    
-      On Error Resume Next
-      With lbl
-        .Caption = ChrW(CLng(arrIcons(i))) & " - " & arrIcons(i)
-      On Error GoTo 0
-        .Top = PosY
-        .Left = PosX
-        .Width = ColSize
-        .Height = 35
-        .AutoSize = False
-        .Font.Name = "Segoe UI Symbol"
-        .Font.Size = 24
-        .ForeColor = vbBlack
-      End With
-      
-      'Debug.Print ChrW(arrIcons(i))
-  Next i
-  
-  frm.Show
-
 End Sub

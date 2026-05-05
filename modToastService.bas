@@ -1,6 +1,6 @@
 Attribute VB_Name = "modToastService"
 Option Explicit
-'Dependencies: modWindowEffects, modToastDesigns
+'Dependencies: modToastWindowEffects, modToastDesigns
 
 'OnTime cannot access local variables so we create a global
 Private gToasts As Collection
